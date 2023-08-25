@@ -76,7 +76,7 @@ function modeFactory() {
     /**
      * Lifecycle hooks
      */
-    onModeEnter: ({ servicesManager, extensionManager, commandsManager }) => {
+    onModeEnter: ({ servicesManager, extensionManager, commandsManager, appConfig }) => {
       const {
         measurementService,
         toolbarService,
@@ -84,6 +84,8 @@ function modeFactory() {
         panelService,
         segmentationService,
       } = servicesManager.services;
+      appConfig.disableEditing = true;
+      appConfig.minDisplaySetsToRunHP = 10;
 
       boundedLoadDerivedDisplaySets = loadDerivedDisplaySets.bind(
         null,
@@ -165,7 +167,7 @@ function modeFactory() {
         boundedLoadDerivedDisplaySets
       );
     },
-    onModeExit: ({ servicesManager }) => {
+    onModeExit: ({ servicesManager, appConfig }) => {
       const {
         toolGroupService,
         syncGroupService,
@@ -173,6 +175,9 @@ function modeFactory() {
         segmentationService,
         cornerstoneViewportService,
       } = servicesManager.services;
+      appConfig.disableEditing = false;
+      appConfig.minDisplaySetsToRunHP = undefined;
+
 
       eventTarget.removeEventListener(
         EVENTS.STACK_VIEWPORT_NEW_STACK,
