@@ -73,6 +73,9 @@ function modeFactory() {
     /**
      * Lifecycle hooks
      */
+    onModeInit: ({ extensionManager }) => {
+      extensionManager.setActiveDataSource('idc-dicomweb');
+    },
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }) => {
       const {
         measurementService,
