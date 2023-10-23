@@ -73,8 +73,8 @@ function modeFactory() {
     /**
      * Lifecycle hooks
      */
-    onModeInit: ({ extensionManager }) => {
-      extensionManager.setActiveDataSource('idc-dicomweb');
+    onModeInit: ({ extensionManager, appConfig }) => {
+      extensionManager.setActiveDataSource(appConfig.defaultDataSourceName);
     },
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }) => {
       const {
