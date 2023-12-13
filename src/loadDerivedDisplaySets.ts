@@ -1,6 +1,5 @@
-import { hydrateRTDisplaySet } from '@ohif/extension-cornerstone-dicom-rt';
-import { hydrateStructuredReport } from '@ohif/extension-cornerstone-dicom-sr';
-import { cache as cs3DCache, volumeLoader } from '@cornerstonejs/core';
+import { hydrateStructuredReport } from "@ohif/extension-cornerstone-dicom-sr";
+import { cache as cs3DCache, volumeLoader } from "@cornerstonejs/core";
 
 const delay = 0;
 
@@ -8,13 +7,13 @@ function getDerivedSequences(displaySetUID, servicesManager) {
   const { displaySetService } = servicesManager.services;
 
   const displaySetCache = displaySetService.getDisplaySetCache();
-  const derivedDisplaySets = [...displaySetCache.values()].filter(ds => {
+  const derivedDisplaySets = [...displaySetCache.values()].filter((ds) => {
     if (ds?.getReferenceDisplaySet) {
       ds?.getReferenceDisplaySet();
     }
     return (
       (ds?.referencedDisplaySetInstanceUID === displaySetUID ||
-        ds.Modality === 'SR') &&
+        ds.Modality === "SR") &&
       !ds?.isHydrated
     );
   });
@@ -28,7 +27,7 @@ export default function loadDerivedDisplaySets(
   evt
 ) {
   async function checkVolume(displaySet, imageIds) {
-    const VOLUME_LOADER_SCHEME = 'cornerstoneStreamingImageVolume';
+    const VOLUME_LOADER_SCHEME = "cornerstoneStreamingImageVolume";
     const volumeLoaderSchema =
       displaySet.volumeLoaderSchema ?? VOLUME_LOADER_SCHEME;
 
@@ -50,7 +49,7 @@ export default function loadDerivedDisplaySets(
 
   const { viewports } = viewportGridService.getState();
   const { viewportId, imageIds } = evt.detail;
-  const mainViewport = viewports.get(viewportId); 
+  const mainViewport = viewports.get(viewportId);
   if (mainViewport) {
     if (mainViewport.displaySetInstanceUIDs.length === 1) {
       const mainDisplaySet = displaySetService.getDisplaySetByUID(
@@ -61,23 +60,24 @@ export default function loadDerivedDisplaySets(
         servicesManager
       );
 
-      derivedDisplaySets.forEach(async displaySet => {
+      derivedDisplaySets.forEach(async (displaySet) => {
         const headers = userAuthenticationService.getAuthorizationHeader();
         await checkVolume(mainDisplaySet, imageIds);
         await displaySet.load({ headers });
         const derivedDisplaySetInstanceUID = displaySet.displaySetInstanceUID;
 
-        if (displaySet.Modality === 'SEG') {
+        if (displaySet.Modality === "SEG") {
           let segmentationId = null;
 
           // We need the hydration to notify panels about the new segmentation added
           const suppressEvents = false;
 
-          segmentationId = await segmentationService.createSegmentationForSEGDisplaySet(
-            displaySet,
-            segmentationId,
-            suppressEvents
-          );
+          segmentationId =
+            await segmentationService.createSegmentationForSEGDisplaySet(
+              displaySet,
+              segmentationId,
+              suppressEvents
+            );
           setTimeout(() => {
             if (
               !mainViewport.displaySetInstanceUIDs.includes(
@@ -88,22 +88,26 @@ export default function loadDerivedDisplaySets(
                 derivedDisplaySetInstanceUID
               );
             }
-            commandsManager.runCommand('loadSegmentationDisplaySetsForViewport', {
-              displaySets: [displaySet],
-              viewportId,
-            });
+            commandsManager.runCommand(
+              "loadSegmentationDisplaySetsForViewport",
+              {
+                displaySets: [displaySet],
+                viewportId,
+              }
+            );
           }, delay);
-        } else if (displaySet.Modality === 'RTSTRUCT') {
+        } else if (displaySet.Modality === "RTSTRUCT") {
           let segmentationId = null;
 
           // We need the hydration to notify panels about the new segmentation added
           const suppressEvents = false;
 
-          segmentationId = await segmentationService.createSegmentationForRTDisplaySet(
-            displaySet,
-            segmentationId,
-            suppressEvents
-          );
+          segmentationId =
+            await segmentationService.createSegmentationForRTDisplaySet(
+              displaySet,
+              segmentationId,
+              suppressEvents
+            );
           setTimeout(() => {
             if (
               !mainViewport.displaySetInstanceUIDs.includes(
@@ -114,13 +118,15 @@ export default function loadDerivedDisplaySets(
                 derivedDisplaySetInstanceUID
               );
             }
-            hydrateRTDisplaySet({
-              rtDisplaySet: displaySet,
-              viewportId,
-              servicesManager,
-            });
+            commandsManager.runCommand(
+              "loadSegmentationDisplaySetsForViewport",
+              {
+                displaySets: [displaySet],
+                viewportId,
+              }
+            );
           }, delay);
-        } else if (displaySet.Modality === 'SR') {
+        } else if (displaySet.Modality === "SR") {
           setTimeout(() => {
             if (
               !mainViewport.displaySetInstanceUIDs.includes(
