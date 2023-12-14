@@ -77,29 +77,34 @@ function modeFactory() {
      * Lifecycle hooks
      */
     onModeInit: ({ extensionManager, appConfig, query }) => {
-      const primaryDataSourceName = appConfig.defaultDataSourceName || "idc-dicomweb";
-      const secondGoogleServer = query.get("secondGoogleServer");
-      if (secondGoogleServer) {
-        const dataSourceBasedOnURL = secondGoogleServer.includes("/dicomStores")
-          ? "gcp-dicomweb-2"
-          : primaryDataSourceName;
-        extensionManager.addDataSource(
-          {
-            sourceName: "merge",
-            namespace: "@ohif/extension-default.dataSourcesModule.merge",
-            configuration: {
-              name: "merge",
-              friendlyName: "Merge Data Source",
-              seriesMerge: {
-                dataSourceNames: [primaryDataSourceName, dataSourceBasedOnURL],
-                defaultDataSourceName: primaryDataSourceName,
+      const defaultDataSourceName =
+        appConfig.defaultDataSourceName || "idc-dicomweb";
+
+      let isActive = false;
+      for (const dataSourceName of query.keys()) {
+        const dataSources = extensionManager.getDataSources(dataSourceName);
+        if (dataSources && dataSources.length) {
+          isActive = true;
+          extensionManager.addDataSource(
+            {
+              sourceName: "merge",
+              namespace: "@ohif/extension-default.dataSourcesModule.merge",
+              configuration: {
+                name: "merge",
+                friendlyName: "Merge Data Source",
+                seriesMerge: {
+                  dataSourceNames: [defaultDataSourceName, dataSourceName],
+                  defaultDataSourceName: defaultDataSourceName,
+                },
               },
             },
-          },
-          { activate: true }
-        );
-      } else {
-        extensionManager.setActiveDataSource(primaryDataSourceName);
+            { activate: true }
+          );
+        }
+      }
+
+      if (!isActive) {
+        extensionManager.setActiveDataSource(defaultDataSourceName);
       }
     },
     onModeEnter: ({
