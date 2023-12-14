@@ -1,9 +1,9 @@
-import { hotkeys } from '@ohif/core';
-import toolbarButtons from './toolbarButtons.js';
-import { id } from './id.js';
-import initToolGroups from './initToolGroups.js';
-import loadDerivedDisplaySets from './loadDerivedDisplaySets';
-import { eventTarget, EVENTS } from '@cornerstonejs/core';
+import { hotkeys } from "@ohif/core";
+import toolbarButtons from "./toolbarButtons.js";
+import { id } from "./id.js";
+import initToolGroups from "./initToolGroups.js";
+import loadDerivedDisplaySets from "./loadDerivedDisplaySets";
+import { eventTarget, EVENTS } from "@cornerstonejs/core";
 
 // Allow this mode by excluding non-imaging modalities such as SR, SEG
 // Also, SM is not a simple imaging modalities, so exclude it.
@@ -76,13 +76,13 @@ function modeFactory() {
     /**
      * Lifecycle hooks
      */
-    onModeInit: ({ extensionManager, query }) => {
-      const primaryDataSourceName = "idc-dicomweb";
+    onModeInit: ({ extensionManager, appConfig, query }) => {
+      const primaryDataSourceName = appConfig.defaultDataSourceName || "idc-dicomweb";
       const secondGoogleServer = query.get("secondGoogleServer");
       if (secondGoogleServer) {
         const dataSourceBasedOnURL = secondGoogleServer.includes("/dicomStores")
           ? "gcp-dicomweb-2"
-          : "idc-dicomweb";
+          : primaryDataSourceName;
         extensionManager.addDataSource(
           {
             sourceName: "merge",
@@ -102,7 +102,12 @@ function modeFactory() {
         extensionManager.setActiveDataSource(primaryDataSourceName);
       }
     },
-    onModeEnter: ({ servicesManager, extensionManager, commandsManager, appConfig }) => {
+    onModeEnter: ({
+      servicesManager,
+      extensionManager,
+      commandsManager,
+      appConfig,
+    }) => {
       const {
         measurementService,
         toolbarService,
@@ -209,7 +214,7 @@ function modeFactory() {
         EVENTS.STACK_VIEWPORT_NEW_STACK,
         boundedLoadDerivedDisplaySets
       );
-      _activatePanelTriggersSubscriptions.forEach(sub => sub.unsubscribe());
+      _activatePanelTriggersSubscriptions.forEach((sub) => sub.unsubscribe());
       _activatePanelTriggersSubscriptions = [];
 
       toolGroupService.destroy();
