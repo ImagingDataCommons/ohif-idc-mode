@@ -1,25 +1,27 @@
-# IDC Mode
+# GCP Mode
 
-This mode adds the following functionalities to OHIF viewer:
-- Automatic loading of the latest derived display set of active series (no need to double-click the derived display set thumbnail in the left panel)
+This mode adds the following functionalities to your OHIF viewer fork:
+- Automatic load of the latest derived display set of active series (no need to double-click the derived display set (e.g. SRs, SEGs) thumbnail in the left panel to render a derived display set)
 
-## Using mode
-- Update OHIF's app package.json file to include this mode as a dependency, pointing to a branch since this mode is not being published to NPM
-```js 
-# platform/app/package.json
-  "dependencies": {
-    "ohif-idc-mode": "https://github.com/ImagingDataCommons/ohif-idc-mode#main-1.0.3",
-    ...
+## Adding the mode to your OHIF fork
+1. Update OHIF's app package.json file to include this mode as a dependency, pointing to a branch since this mode is not being published to NPM:
+```js
+/** File: platform/app/package.json */
+
+"dependencies": {
+  "ohif-idc-mode": "https://github.com/ImagingDataCommons/ohif-idc-mode#main", /** You can use any valid branch name here (#main or #master or #your-branch) */
+  ...
 ```
 
-- Update OHIF's plugin file to load this mode (version here does not matter since we are using a branch name to define this mode dependency instead of npm publishing)
+2. Update OHIF's plugin file to load this mode:
 ```js
-# platform/app/pluginConfig.json
- "modes": [
-    ...
-    {
-      "packageName": "ohif-idc-mode",
-      "version": "0.0.1"
-    },
-   ...
+/** File: platform/app/pluginConfig.json */
+
+"modes": [
+  ...
+  {
+    "packageName": "ohif-idc-mode",
+    "version": "0.0.1" /** The version here does not matter since we are using a branch name to define this mode dependency instead of npm publishing */
+  },
+ ...
 ```
